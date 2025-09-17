@@ -1,0 +1,24 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - jiggy.</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <!-- floating brand -->
+    <div class="brand">jiggy.</div>
+
+    <!-- background canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- page content -->
+    <main>
+        @RenderBody()
+    </main>
+
+    <script src="~/js/wireframes.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

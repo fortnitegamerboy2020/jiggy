@@ -1,0 +1,83 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "downloader";
+    Layout = "_Layout";
+}
+
+<section class="card">
+    <h1 class="title">downloader</h1>
+
+    <form id="downloadForm" method="post">
+        <div class="field">
+            <label for="url">URL</label>
+            <input type="text" 
+                   id="url" 
+                   name="Url" 
+                   placeholder="https://youtube.com/" 
+                   required 
+                   autocomplete="off" />
+        </div>
+
+        <div class="field radios">
+            <span>format</span>
+            <label class="radio"><input type="radio" name="format" value="mp4" checked /> mp4</label>
+            <label class="radio"><input type="radio" name="format" value="mp3" /> mp3</label>
+        </div>
+
+        <div class="actions">
+            <button id="downloadBtn" class="btn" type="submit">download</button>
+        </div>
+    </form>
+
+    @if (!string.IsNullOrEmpty(Model.StatusMessage))
+    {
+        <div class="status">@Model.StatusMessage</div>
+    }
+</section>
+
+@section Scripts {
+<script>
+const form = document.getElementById("downloadForm");
+const btn = document.getElementById("downloadBtn");
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  btn.textContent = "downloading...";
+
+  const formData = new FormData(form);
+  try {
+    const res = await fetch("/", { method: "POST", body: formData });
+    if (!res.ok) throw new Error("Server error");
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    let filename = "download.mp4";
+    const cd = res.headers.get("Content-Disposition");
+
+    if (cd) {
+      const utf8Match = cd.match(/filename\*\=UTF-8''(.+)/);
+      if (utf8Match) filename = decodeURIComponent(utf8Match[1]);
+      else {
+        const asciiMatch = cd.match(/filename=\"?([^\";]+)\"?/);
+        if (asciiMatch) filename = asciiMatch[1];
+      }
+    }
+    a.download = filename;
+
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+
+    btn.textContent = "downloaded!";
+    setTimeout(() => btn.textContent = "download", 2000);
+  } catch (err) {
+    btn.textContent = "retry...";
+    setTimeout(() => btn.textContent = "download", 2000);
+  }
+});
+</script>
+}
